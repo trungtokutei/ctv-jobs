@@ -159,7 +159,6 @@ const CSV_URL = "https://docs.google.com/spreadsheets/d/" + SHEET_ID + "/gviz/tq
 
 const COLS = [
   { key:"stt",   label:"STT",          sortable:false },
-  { key:"ten",   label:"Tên công việc",sortable:true  },
   { key:"nganh", label:"Ngành nghề",   sortable:true  },
   { key:"tinh",  label:"Tỉnh/TP",      sortable:true  },
   { key:"luong", label:"Lương",        sortable:true  },
@@ -201,17 +200,13 @@ function buildJobs(text){
     gt:idx("giới tính"), mota:idx("mô tả"), trang:idx("trạng thái")
   };
   if(I.loai<0||I.trang<0) throw new Error("Không tìm thấy cột Loại đơn / Trạng thái trong sheet.");
-  // B1 chứa tất cả tên gộp lại (mỗi dòng 1 tên), dòng đầu là tên cột — bỏ qua
-  const tenList = I.ten>=0
-    ? rows[0][I.ten].split('\n').map(s=>s.trim()).filter(Boolean).slice(1)
-    : [];
   const out=[];
   for(let r=1;r<rows.length;r++){
     const c=rows[r];
     const g=k=> I[k]>=0 ? clean(c[I[k]]) : "";
     const loai=g("loai"), trang=g("trang").toLowerCase();
     if(loai==="Việt"||loai==="Nhật-Việt"){
-      out.push({ loai, trang, ten:clean(tenList[r-1]||g("ten")), nganh:g("nganh"), tinh:g("tinh"),
+      out.push({ loai, trang, nganh:g("nganh"), tinh:g("tinh"),
         luong:g("luong"), tn:g("tn"), gt:g("gt"), mota:g("mota") });
     }
   }
@@ -342,8 +337,7 @@ function render(){
         ? '<br><span class="tag closed">● Đã đóng</span>' : '';
       return `<tr class="${x.trang!=='active'?'closed':''}">
         <td class="center">${i+1}</td>
-        <td>${esc(x.ten)}${closed}</td>
-        <td>${esc(x.nganh)}</td>
+        <td>${esc(x.nganh)}${closed}</td>
         <td>${esc(x.tinh)}</td>
         <td>${esc(x.luong)}</td>
         <td class="center">${esc(x.tn)}</td>
