@@ -121,8 +121,17 @@ tr.closed td { opacity: .5; }
         </button>
         <div class="cs-panel" id="nganhPanel"></div>
       </div>
-      <select class="filter-select" id="tinhSelect">
-        <option value="">Tỉnh / TP</option>
+      <select class="filter-select" id="khuvucSelect">
+        <option value="">Khu vực</option>
+        <option value="Hokkaido">Hokkaido (北海道)</option>
+        <option value="Tohoku">Tohoku — Aomori, Miyagi...</option>
+        <option value="Kanto">Kanto — Tokyo, Kanagawa...</option>
+        <option value="Chubu">Chubu — Aichi, Shizuoka...</option>
+        <option value="Kansai">Kansai — Osaka, Kyoto...</option>
+        <option value="Chugoku">Chugoku — Hiroshima...</option>
+        <option value="Shikoku">Shikoku — Ehime, Kagawa...</option>
+        <option value="Kyushu">Kyushu — Fukuoka...</option>
+        <option value="Okinawa">Okinawa (沖縄)</option>
       </select>
       <select class="filter-select" id="status">
         <option value="active">Đang tuyển</option>
@@ -138,7 +147,7 @@ tr.closed td { opacity: .5; }
   <div class="wrap">
     <table>
       <thead><tr id="thead"></tr></thead>
-      <tbody id="tbody"><tr><td colspan="9"><div class="msg"><div class="spin"></div>Đang tải dữ liệu từ Google Sheets…</div></td></tr></tbody>
+      <tbody id="tbody"><tr><td colspan="8"><div class="msg"><div class="spin"></div>Đang tải dữ liệu từ Google Sheets…</div></td></tr></tbody>
     </table>
   </div>
   <div class="foot" id="foot"></div>
@@ -150,7 +159,6 @@ const CSV_URL = "https://docs.google.com/spreadsheets/d/" + SHEET_ID + "/gviz/tq
 
 const COLS = [
   { key:"stt",   label:"STT",          sortable:false },
-  { key:"loai",  label:"Loại đơn",     sortable:true  },
   { key:"ten",   label:"Tên công việc",sortable:true  },
   { key:"nganh", label:"Ngành nghề",   sortable:true  },
   { key:"tinh",  label:"Tỉnh/TP",      sortable:true  },
@@ -252,11 +260,7 @@ function populateFilters(){
     };
   });
 
-  // tỉnh/TP select — vẫn dynamic từ data
-  const tinhs = [...new Set(ALL.map(x=>x.tinh).filter(Boolean))].sort();
-  const sel = document.getElementById("tinhSelect");
-  sel.innerHTML = `<option value="">Tỉnh / TP</option>` +
-    tinhs.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join("");
+  // khuvucSelect is static HTML, no populate needed
 }
 
 function esc(s){ return (s||"").replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
@@ -265,10 +269,26 @@ function statusFiltered(){
   return status==="all" ? ALL.slice() : ALL.filter(x=>x.trang===status);
 }
 
+const REGIONS = {
+  'Hokkaido':['Hokkaido'],
+  'Tohoku':['Aomori','Iwate','Miyagi','Akita','Yamagata','Fukushima'],
+  'Kanto':['Ibaraki','Tochigi','Gunma','Saitama','Chiba','Tokyo','Kanagawa'],
+  'Chubu':['Niigata','Toyama','Ishikawa','Fukui','Yamanashi','Nagano','Shizuoka','Aichi','Mie'],
+  'Kansai':['Shiga','Kyoto','Osaka','Hyogo','Nara','Wakayama'],
+  'Chugoku':['Tottori','Shimane','Okayama','Hiroshima','Yamaguchi'],
+  'Shikoku':['Tokushima','Kagawa','Ehime','Kochi'],
+  'Kyushu':['Fukuoka','Saga','Nagasaki','Kumamoto','Oita','Miyazaki','Kagoshima'],
+  'Okinawa':['Okinawa'],
+};
+
 function visible(){
   let r = statusFiltered();
   if(currentCat) r = r.filter(x=>x.nganh===currentCat);
-  if(currentPref) r = r.filter(x=>x.tinh===currentPref);
+  if(currentPref) {
+    const prefList = REGIONS[currentPref];
+    if(prefList) r = r.filter(x => prefList.some(p=>(x.tinh||'').toLowerCase().includes(p.toLowerCase())));
+    else r = r.filter(x=>(x.tinh||'').toLowerCase().includes(currentPref.toLowerCase()));
+  }
   const q=document.getElementById("search").value.trim().toLowerCase();
   if(q) r=r.filter(x=>(x.ten+" "+x.nganh+" "+x.tinh+" "+x.mota).toLowerCase().includes(q));
   if(sortKey) r.sort((a,b)=>{
@@ -308,7 +328,7 @@ function render(){
   const rows=visible();
   const tb=document.getElementById("tbody");
   if(!rows.length){
-    tb.innerHTML=`<tr><td colspan="9"><div class="msg">Không có job nào khớp.</div></td></tr>`;
+    tb.innerHTML=`<tr><td colspan="8"><div class="msg">Không có job nào khớp.</div></td></tr>`;
   } else {
     tb.innerHTML=rows.map((x,i)=>{
       const tag=x.loai==="Nhật-Việt"
@@ -316,10 +336,9 @@ function render(){
         : '<span class="tag viet">Việt</span>';
       const closed=x.trang!=="active"
         ? '<br><span class="tag closed">● Đã đóng</span>' : '';
-      return `<tr class="${x.loai==='Nhật-Việt'?'nv':''} ${x.trang!=='active'?'closed':''}">
+      return `<tr class="${x.trang!=='active'?'closed':''}">
         <td class="center">${i+1}</td>
-        <td>${tag}${closed}</td>
-        <td><b>${esc(x.ten)}</b></td>
+        <td>${esc(x.ten)}${closed}</td>
         <td>${esc(x.nganh)}</td>
         <td>${esc(x.tinh)}</td>
         <td>${esc(x.luong)}</td>
@@ -347,7 +366,7 @@ function setNganh(val){
 
 function setTinh(val){
   currentPref = val || null;
-  const sel = document.getElementById("tinhSelect");
+  const sel = document.getElementById("khuvucSelect");
   sel.value = val || "";
   sel.classList.toggle("has-value", !!val);
   render();
@@ -380,7 +399,7 @@ function clearAll(){
 
 async function load(){
   document.getElementById("tbody").innerHTML=
-    `<tr><td colspan="9"><div class="msg"><div class="spin"></div>Đang tải dữ liệu…</div></td></tr>`;
+    `<tr><td colspan="8"><div class="msg"><div class="spin"></div>Đang tải dữ liệu…</div></td></tr>`;
   try {
     const res=await fetch(CSV_URL+"&_="+Date.now());
     if(!res.ok) throw new Error("HTTP "+res.status);
@@ -397,7 +416,7 @@ async function load(){
     render();
   } catch(e){
     document.getElementById("tbody").innerHTML=
-      `<tr><td colspan="9"><div class="msg err">Lỗi tải dữ liệu:<br>${esc(e.message||String(e))}</div></td></tr>`;
+      `<tr><td colspan="8"><div class="msg err">Lỗi tải dữ liệu:<br>${esc(e.message||String(e))}</div></td></tr>`;
     document.getElementById("sub").textContent="Không tải được dữ liệu.";
   }
 }
@@ -408,7 +427,7 @@ document.getElementById("nganhPanel").addEventListener("click", e=>{
   const item = e.target.closest(".cs-flat-item");
   if(item) setNganh(item.dataset.val);
 });
-document.getElementById("tinhSelect").onchange = function(){ setTinh(this.value); };
+document.getElementById("khuvucSelect").onchange = function(){ setTinh(this.value); };
 document.getElementById("status").onchange = function(){ status=this.value; render(); };
 document.getElementById("search").oninput = function(){
   document.getElementById("searchClear").classList.toggle("show", this.value.length>0);
