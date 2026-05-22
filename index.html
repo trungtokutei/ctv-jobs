@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Job đầu Việt — Cộng tác viên</title>
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    background: #f0f0f0; color: #1a1a1a; font-size: 14px;
+  }
+  .page { max-width: 1180px; margin: 0 auto; padding: 18px 16px 40px; }
+  .head h1 { font-size: 21px; }
+  .head h1 .dot { color: #c0392b; }
+  .sub { color: #777; font-size: 12px; margin-top: 4px; }
+  .bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 16px 0; }
+  .chip {
+    border: 1px solid #d5d5d5; background: #fff; color: #444;
+    padding: 7px 15px; border-radius: 20px; cursor: pointer; font-size: 13px;
+    transition: all .12s; user-select: none;
+  }
+  .chip:hover { border-color: #c0392b; }
+  .chip.on { background: #c0392b; color: #fff; border-color: #c0392b; font-weight: 600; }
+  .chip .n { opacity: .75; font-size: 11px; }
+  select.sel {
+    padding: 7px 10px; border: 1px solid #d5d5d5; border-radius: 8px;
+    font-size: 13px; background: #fff; color: #444; cursor: pointer; outline: none;
+  }
+  select.sel:focus { border-color: #c0392b; }
+  input.search {
+    flex: 1; min-width: 160px; padding: 8px 13px; border: 1px solid #d5d5d5;
+    border-radius: 8px; font-size: 13px; outline: none;
+  }
+  input.search:focus { border-color: #c0392b; }
+  .btn {
+    border: 1px solid #d5d5d5; background: #fff; color: #444; cursor: pointer;
+    padding: 8px 14px; border-radius: 8px; font-size: 13px;
+  }
+  .btn:hover { border-color: #c0392b; color: #c0392b; }
+  .count { font-size: 12px; color: #777; }
+  .wrap { background: #fff; border-radius: 10px; overflow: auto; border: 1px solid #e3e3e3; }
+  table { width: 100%; border-collapse: collapse; min-width: 860px; }
+  th {
+    background: #1a1a1a; color: #fff; font-size: 11px; font-weight: 600;
+    text-align: left; padding: 10px; cursor: pointer; white-space: nowrap;
+  }
+  th:hover { background: #333; }
+  th .arr { opacity: .55; font-size: 9px; }
+  td { padding: 9px 10px; border-top: 1px solid #eee; vertical-align: top; font-size: 13px; }
+  tr.nv td { background: #fcf3cf; }
+  tr:not(.nv):nth-child(even) td { background: #fafafa; }
+  tr:hover td { background: #fdeded; }
+  tr.closed td { opacity: .5; }
+  .tag {
+    display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 7px;
+    border-radius: 4px; white-space: nowrap;
+  }
+  .tag.viet { background: #e8f5e9; color: #2e7d32; }
+  .tag.nv { background: #fff3cd; color: #946c00; }
+  .tag.closed { background: #eee; color: #888; margin-top: 4px; }
+  .desc { color: #555; font-size: 12px; line-height: 1.45; min-width: 240px; }
+  .center { text-align: center; }
+  .msg { padding: 50px 20px; text-align: center; color: #888; line-height: 1.6; }
+  .msg.err { color: #c0392b; }
+  .spin {
+    width: 26px; height: 26px; border: 3px solid #eee; border-top-color: #c0392b;
+    border-radius: 50%; margin: 0 auto 12px; animation: r .8s linear infinite;
+  }
+  @keyframes r { to { transform: rotate(360deg); } }
+  .foot { margin-top: 12px; font-size: 11px; color: #999; text-align: center; }
+  @media (max-width: 600px) {
+    .head h1 { font-size: 18px; }
+    .count { width: 100%; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="head">
+    <h1><span class="dot">●</span> Job đầu Việt — Cộng tác viên</h1>
+    <div class="sub" id="sub">Đang tải dữ liệu…</div>
+  </div>
+
+  <div class="bar">
+    <div class="chip on" data-f="all">Tất cả <span class="n" id="n-all"></span></div>
+    <div class="chip" data-f="Việt">Việt <span class="n" id="n-viet"></span></div>
+    <div class="chip" data-f="Nhật-Việt">Nhật-Việt <span class="n" id="n-nv"></span></div>
+    <select class="sel" id="status">
+      <option value="active">Đang tuyển</option>
+      <option value="inactive">Đã đóng</option>
+      <option value="all">Tất cả trạng thái</option>
+    </select>
+    <input class="search" id="search" placeholder="Tìm công việc, ngành, tỉnh…">
+    <button class="btn" id="refresh">↻ Làm mới</button>
+    <div class="count" id="count"></div>
+  </div>
+
+  <div class="wrap">
+    <table>
+      <thead><tr id="thead"></tr></thead>
+      <tbody id="tbody"><tr><td colspan="9"><div class="msg"><div class="spin"></div>Đang tải dữ liệu từ Google Sheets…</div></td></tr></tbody>
+    </table>
+  </div>
+  <div class="foot" id="foot"></div>
+</div>
+
+<script>
+/* ================================================================
+   CẤU HÌNH
+   Trang đọc dữ liệu từ Google Sheet CÔNG KHAI "Trung Phạm Tokutei"
+   — sheet này chỉ chứa cột A→P, KHÔNG có Nguồn, Hoa hồng, Net.
+   ================================================================ */
+const SHEET_ID = "1ASjVcbiuclPYd-FkVKa7uIKjjKqzwRUCFpSmrdYVQ1E";
+/* ================================================================ */
+const CSV_URL = "https://docs.google.com/spreadsheets/d/" + SHEET_ID + "/gviz/tq?tqx=out:csv";
+
+const COLS = [
+  { key:"stt",   label:"STT",          sortable:false },
+  { key:"loai",  label:"Loại đơn",     sortable:true  },
+  { key:"ten",   label:"Tên công việc",sortable:true  },
+  { key:"nganh", label:"Ngành nghề",   sortable:true  },
+  { key:"tinh",  label:"Tỉnh/TP",      sortable:true  },
+  { key:"luong", label:"Lương",        sortable:true  },
+  { key:"tn",    label:"Tiếng Nhật",   sortable:true  },
+  { key:"gt",    label:"Giới tính",    sortable:true  },
+  { key:"mota",  label:"Mô tả",        sortable:false }
+];
+let ALL = [], filter = "all", status = "active", sortKey = "", sortDir = "asc";
+
+function parseCSV(text){
+  const rows=[]; let row=[], field="", inQ=false, i=0;
+  while(i<text.length){
+    const c=text[i];
+    if(inQ){
+      if(c==='"'){ if(text[i+1]==='"'){ field+='"'; i+=2; continue; } inQ=false; i++; continue; }
+      field+=c; i++; continue;
+    }
+    if(c==='"'){ inQ=true; i++; continue; }
+    if(c===','){ row.push(field); field=""; i++; continue; }
+    if(c==='\r'){ i++; continue; }
+    if(c==='\n'){ row.push(field); rows.push(row); row=[]; field=""; i++; continue; }
+    field+=c; i++;
+  }
+  if(field!==""||row.length){ row.push(field); rows.push(row); }
+  return rows;
+}
+
+function clean(s){ return (s||"").replace(/\s*\n\s*/g," ").trim(); }
+
+function buildJobs(text){
+  const rows = parseCSV(text);
+  if(rows.length<2) return [];
+  const header = rows[0].map(h=>clean(h).toLowerCase());
+  const idx = name => header.findIndex(h=>h.includes(name));
+  const I = {
+    loai:idx("loại đơn"), ten:idx("tên công việc"), nganh:idx("ngành nghề"),
+    tinh:idx("tỉnh"), luong:idx("lương"), tn:idx("tiếng nhật"),
+    gt:idx("giới tính"), mota:idx("mô tả"), trang:idx("trạng thái")
+  };
+  if(I.loai<0||I.trang<0) throw new Error("Không tìm thấy cột Loại đơn / Trạng thái trong sheet.");
+  const out=[];
+  for(let r=1;r<rows.length;r++){
+    const c=rows[r];
+    const g=k=> I[k]>=0 ? clean(c[I[k]]) : "";
+    const loai=g("loai"), trang=g("trang").toLowerCase();
+    if(loai==="Việt"||loai==="Nhật-Việt"){
+      out.push({ loai, trang, ten:g("ten"), nganh:g("nganh"), tinh:g("tinh"),
+        luong:g("luong"), tn:g("tn"), gt:g("gt"), mota:g("mota") });
+    }
+  }
+  return out;
+}
+
+function esc(s){ return (s||"").replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
+
+function statusFiltered(){
+  return status==="all" ? ALL.slice() : ALL.filter(x=>x.trang===status);
+}
+
+function visible(){
+  let r = statusFiltered();
+  if(filter!=="all") r=r.filter(x=>x.loai===filter);
+  const q=document.getElementById("search").value.trim().toLowerCase();
+  if(q) r=r.filter(x=>(x.ten+" "+x.nganh+" "+x.tinh+" "+x.mota).toLowerCase().includes(q));
+  if(sortKey) r.sort((a,b)=>{
+    const x=(a[sortKey]||"").toLowerCase(), y=(b[sortKey]||"").toLowerCase();
+    return (x<y?-1:x>y?1:0)*(sortDir==="asc"?1:-1);
+  });
+  return r;
+}
+
+function render(){
+  const thead=document.getElementById("thead");
+  thead.innerHTML=COLS.map(c=>{
+    const a=(sortKey===c.key)?(sortDir==="asc"?" ▲":" ▼"):"";
+    return `<th data-k="${c.key}">${c.label}<span class="arr">${a}</span></th>`;
+  }).join("");
+  thead.querySelectorAll("th").forEach(th=>{
+    const col=COLS.find(c=>c.key===th.dataset.k);
+    if(!col.sortable) return;
+    th.onclick=()=>{
+      if(sortKey===col.key) sortDir=(sortDir==="asc"?"desc":"asc");
+      else { sortKey=col.key; sortDir="asc"; }
+      render();
+    };
+  });
+
+  const rows=visible();
+  const tb=document.getElementById("tbody");
+  if(!rows.length){
+    tb.innerHTML=`<tr><td colspan="9"><div class="msg">Không có job nào khớp.</div></td></tr>`;
+  } else {
+    tb.innerHTML=rows.map((x,i)=>{
+      const tag=x.loai==="Nhật-Việt"
+        ? '<span class="tag nv">Nhật-Việt</span>'
+        : '<span class="tag viet">Việt</span>';
+      const closed=x.trang!=="active"
+        ? '<br><span class="tag closed">● Đã đóng</span>' : '';
+      return `<tr class="${x.loai==='Nhật-Việt'?'nv':''} ${x.trang!=='active'?'closed':''}">
+        <td class="center">${i+1}</td>
+        <td>${tag}${closed}</td>
+        <td><b>${esc(x.ten)}</b></td>
+        <td>${esc(x.nganh)}</td>
+        <td>${esc(x.tinh)}</td>
+        <td>${esc(x.luong)}</td>
+        <td class="center">${esc(x.tn)}</td>
+        <td class="center">${esc(x.gt)}</td>
+        <td class="desc">${esc(x.mota)}</td>
+      </tr>`;
+    }).join("");
+  }
+
+  const base=statusFiltered();
+  const nv=base.filter(x=>x.loai==="Nhật-Việt").length;
+  document.getElementById("n-all").textContent=base.length;
+  document.getElementById("n-viet").textContent=base.length-nv;
+  document.getElementById("n-nv").textContent=nv;
+  document.getElementById("count").textContent=`Hiển thị ${rows.length} job`;
+  document.querySelectorAll(".chip").forEach(c=>c.classList.toggle("on",c.dataset.f===filter));
+}
+
+async function load(){
+  document.getElementById("tbody").innerHTML=
+    `<tr><td colspan="9"><div class="msg"><div class="spin"></div>Đang tải dữ liệu…</div></td></tr>`;
+  try {
+    const res=await fetch(CSV_URL+"&_="+Date.now());
+    if(!res.ok) throw new Error("HTTP "+res.status);
+    const text=await res.text();
+    if(text.trim().startsWith("<"))
+      throw new Error("Google trả về trang đăng nhập thay vì dữ liệu. Hãy kiểm tra: Google Sheet phải được chia sẻ ở chế độ \"Bất kỳ ai có đường liên kết → Người xem\".");
+    ALL=buildJobs(text);
+    const act=ALL.filter(x=>x.trang==="active").length;
+    document.getElementById("sub").textContent=
+      `${ALL.length} job đầu Việt (Việt + Nhật-Việt) · ${act} đang tuyển, ${ALL.length-act} đã đóng`;
+    document.getElementById("foot").textContent=
+      "Dữ liệu từ Google Sheets · Cập nhật lúc "+new Date().toLocaleString("vi-VN");
+    render();
+  } catch(e){
+    document.getElementById("tbody").innerHTML=
+      `<tr><td colspan="9"><div class="msg err">Lỗi tải dữ liệu:<br>${esc(e.message||String(e))}</div></td></tr>`;
+    document.getElementById("sub").textContent="Không tải được dữ liệu.";
+  }
+}
+
+document.querySelectorAll(".chip").forEach(c=>{
+  c.onclick=()=>{ filter=c.dataset.f; render(); };
+});
+document.getElementById("status").onchange=function(){ status=this.value; render(); };
+document.getElementById("search").oninput=render;
+document.getElementById("refresh").onclick=load;
+load();
+</script>
+</body>
+</html>
