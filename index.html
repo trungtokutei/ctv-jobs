@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Các đơn bên em đang tuyển - Nhờ các anh, chị hỗ trợ ạ</title>
+<title>Các đơn ĐẦU VIỆT bên em đang tuyển - Nhờ các anh, chị hỗ trợ ạ</title>
 <style>
 :root {
   --bg:#f5f7f5; --surface:#fff; --border:#e2ece8;
@@ -16,6 +16,7 @@ body { font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif; backgr
 .page { max-width: 1180px; margin: 0 auto; padding: 18px 16px 40px; }
 .head h1 { font-size: 21px; }
 .head h1 .dot { color: var(--accent); }
+.head h1 .hl { color: var(--accent); }
 .sub { color: var(--text-3); font-size: 12px; margin-top: 4px; }
 
 /* filter bar */
@@ -44,6 +45,13 @@ body { font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif; backgr
 .cs-flat-item { display: flex; align-items: center; width: 100%; padding: 9px 16px; background: none; border: none; text-align: left; font-size: 13px; color: var(--text-1); cursor: pointer; font-family: inherit; }
 .cs-flat-item:hover { background: var(--bg); }
 .cs-flat-item.cs-selected { color: var(--primary); font-weight: 600; }
+.cs-group-hd { display: flex; align-items: center; justify-content: space-between; gap: 6px; width: 100%; padding: 9px 12px 9px 16px; background: none; border: none; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-2); cursor: pointer; font-family: inherit; letter-spacing: .03em; text-transform: uppercase; }
+.cs-group-hd:hover { background: var(--bg); }
+.cs-group-hd svg { flex-shrink: 0; transition: transform .2s; }
+.cs-group-hd.open svg { transform: rotate(180deg); }
+.cs-group-items { display: none; }
+.cs-group-items.open { display: block; }
+.cs-group-items .cs-flat-item { padding-left: 24px; }
 
 /* active filter chips */
 .filter-chips-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; align-items: center; }
@@ -95,7 +103,7 @@ tr.closed td { opacity: .5; }
 <body>
 <div class="page">
   <div class="head">
-    <h1><span class="dot">●</span> Các đơn bên em đang tuyển - Nhờ các anh, chị hỗ trợ ạ</h1>
+    <h1><span class="dot">●</span> Các đơn <span class="hl">ĐẦU VIỆT</span> bên em đang tuyển - Nhờ các anh, chị hỗ trợ ạ</h1>
     <div class="sub" id="sub">Đang tải dữ liệu…</div>
   </div>
 
@@ -198,14 +206,53 @@ function buildJobs(text){
   return out;
 }
 
-function populateFilters(){
-  // ngành nghề dropdown
-  const nganhs = [...new Set(ALL.map(x=>x.nganh).filter(Boolean))].sort();
-  const panel = document.getElementById("nganhPanel");
-  panel.innerHTML = `<button class="cs-flat-item cs-selected" data-val="">Tất cả ngành</button>` +
-    nganhs.map(n=>`<button class="cs-flat-item" data-val="${esc(n)}">${esc(n)}</button>`).join("");
+const NGANH_GROUPS = [
+  {g:'Chế biến thực phẩm', items:['Chế biến thực phẩm']},
+  {g:'① Gia công cơ khí - kim loại', items:['Đúc nóng','Đúc lạnh','Dập kim loại','Kim loại tấm','Tekko','Rèn','Gia công cơ khí','Hoàn thiện sản phẩm','Đúc nhựa','Hàn','Sơn kim loại','Lắp ráp thiết bị điện','Kiểm tra máy móc','Bảo trì máy móc','Đóng gói công nghiệp']},
+  {g:'② Lắp ráp điện - điện tử', items:['Gia công cơ khí','Hoàn thiện sản phẩm','Đúc nhựa','Lắp ráp thiết bị điện','Lắp ráp thiết bị điện tử','Sản xuất bảng mạch in (PCB)','Kiểm tra máy móc','Bảo trì máy móc','Đóng gói công nghiệp']},
+  {g:'③ Xử lý bề mặt kim loại', items:['Mạ điện','Xử lý oxy hóa nhôm (Anodize)']},
+  {g:'Xây dựng', items:['Nhóm ngành xây dựng','Đường ống','Cốp pha','Phá dỡ','Cốt thép','Sơn xây dựng','Chống thấm','Giàn giáo','Bê tông','Xây trát','San lấp','Ốp lát','Lái máy xây dựng','Hoàn thiện nội thất','Mộc xây dựng','Hoàn thiện ngoại thất','Hàn xây dựng','Điện','Thi công cách nhiệt','Lợp mái','Kim loại tấm xây dựng']},
+  {g:'Điều dưỡng', items:['Điều dưỡng']},
+  {g:'Nhà hàng', items:['Nhà hàng']},
+  {g:'Nông nghiệp', items:['Nông nghiệp']},
+  {g:'Vệ sinh tòa nhà', items:['Vệ sinh tòa nhà']},
+  {g:'Bảo dưỡng ô tô', items:['Bảo dưỡng ô tô']},
+  {g:'Lưu trú / Khách sạn', items:['Lưu trú / Khách sạn']},
+  {g:'Ngư nghiệp', items:['Ngư nghiệp']},
+  {g:'Đóng tàu', items:['Đóng tàu']},
+  {g:'Hàng không', items:['Hàng không']},
+  {g:'Vận tải', items:['Vận tải']},
+  {g:'Lâm nghiệp', items:['Lâm nghiệp']},
+  {g:'May', items:['May']},
+  {g:'In ấn', items:['In ấn']},
+];
 
-  // tỉnh/TP select
+const CHEVRON = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>`;
+
+function buildNganhHTML(){
+  return NGANH_GROUPS.map(({g, items}) =>
+    items.length === 1
+      ? `<button class="cs-flat-item" data-val="${esc(items[0])}">${esc(items[0])}</button>`
+      : `<button class="cs-group-hd">${esc(g)} ${CHEVRON}</button>
+         <div class="cs-group-items">${items.map(v=>`<button class="cs-flat-item" data-val="${esc(v)}">${esc(v)}</button>`).join('')}</div>`
+  ).join('');
+}
+
+function populateFilters(){
+  const panel = document.getElementById("nganhPanel");
+  panel.innerHTML = `<button class="cs-flat-item cs-selected" data-val="">Tất cả ngành</button>` + buildNganhHTML();
+
+  // group header toggle
+  panel.querySelectorAll(".cs-group-hd").forEach(hd=>{
+    hd.onclick = e => {
+      e.stopPropagation();
+      const items = hd.nextElementSibling;
+      const open = items.classList.toggle("open");
+      hd.classList.toggle("open", open);
+    };
+  });
+
+  // tỉnh/TP select — vẫn dynamic từ data
   const tinhs = [...new Set(ALL.map(x=>x.tinh).filter(Boolean))].sort();
   const sel = document.getElementById("tinhSelect");
   sel.innerHTML = `<option value="">Tỉnh / TP</option>` +
