@@ -5,75 +5,75 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Các đơn bên em đang tuyển - Nhờ các anh, chị hỗ trợ ạ</title>
 <style>
-  :root { color-scheme: light; }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-    background: #f0f0f0; color: #1a1a1a; font-size: 14px;
-  }
-  .page { max-width: 1180px; margin: 0 auto; padding: 18px 16px 40px; }
-  .head h1 { font-size: 21px; }
-  .head h1 .dot { color: #c0392b; }
-  .sub { color: #777; font-size: 12px; margin-top: 4px; }
-  .bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 16px 0; }
-  .chip {
-    border: 1px solid #d5d5d5; background: #fff; color: #444;
-    padding: 7px 15px; border-radius: 20px; cursor: pointer; font-size: 13px;
-    transition: all .12s; user-select: none;
-  }
-  .chip:hover { border-color: #c0392b; }
-  .chip.on { background: #c0392b; color: #fff; border-color: #c0392b; font-weight: 600; }
-  .chip .n { opacity: .75; font-size: 11px; }
-  select.sel {
-    padding: 7px 10px; border: 1px solid #d5d5d5; border-radius: 8px;
-    font-size: 13px; background: #fff; color: #444; cursor: pointer; outline: none;
-  }
-  select.sel:focus { border-color: #c0392b; }
-  input.search {
-    flex: 1; min-width: 160px; padding: 8px 13px; border: 1px solid #d5d5d5;
-    border-radius: 8px; font-size: 13px; outline: none;
-  }
-  input.search:focus { border-color: #c0392b; }
-  .btn {
-    border: 1px solid #d5d5d5; background: #fff; color: #444; cursor: pointer;
-    padding: 8px 14px; border-radius: 8px; font-size: 13px;
-  }
-  .btn:hover { border-color: #c0392b; color: #c0392b; }
-  .count { font-size: 12px; color: #777; }
-  .wrap { background: #fff; border-radius: 10px; overflow: auto; border: 1px solid #e3e3e3; }
-  table { width: 100%; border-collapse: collapse; min-width: 860px; }
-  th {
-    background: #1a1a1a; color: #fff; font-size: 11px; font-weight: 600;
-    text-align: left; padding: 10px; cursor: pointer; white-space: nowrap;
-  }
-  th:hover { background: #333; }
-  th .arr { opacity: .55; font-size: 9px; }
-  td { padding: 9px 10px; border-top: 1px solid #eee; vertical-align: top; font-size: 13px; }
-  tr.nv td { background: #fcf3cf; }
-  tr:not(.nv):nth-child(even) td { background: #fafafa; }
-  tr:hover td { background: #fdeded; }
-  tr.closed td { opacity: .5; }
-  .tag {
-    display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 7px;
-    border-radius: 4px; white-space: nowrap;
-  }
-  .tag.viet { background: #e8f5e9; color: #2e7d32; }
-  .tag.nv { background: #fff3cd; color: #946c00; }
-  .tag.closed { background: #eee; color: #888; margin-top: 4px; }
-  .desc { color: #555; font-size: 12px; line-height: 1.45; min-width: 240px; }
-  .center { text-align: center; }
-  .msg { padding: 50px 20px; text-align: center; color: #888; line-height: 1.6; }
-  .msg.err { color: #c0392b; }
-  .spin {
-    width: 26px; height: 26px; border: 3px solid #eee; border-top-color: #c0392b;
-    border-radius: 50%; margin: 0 auto 12px; animation: r .8s linear infinite;
-  }
-  @keyframes r { to { transform: rotate(360deg); } }
-  .foot { margin-top: 12px; font-size: 11px; color: #999; text-align: center; }
-  @media (max-width: 600px) {
-    .head h1 { font-size: 18px; }
-    .count { width: 100%; }
-  }
+:root {
+  --bg:#f5f7f5; --surface:#fff; --border:#e2ece8;
+  --primary:#356854; --primary-soft:#e8f2ee;
+  --accent:#c0392b; --accent-soft:#fdeded;
+  --text-1:#1a1a1a; --text-2:#5a6b64; --text-3:#9aada6;
+  --viet:#22a85a; --viet-soft:#e8f8ef;
+  --nv:#d97706; --nv-soft:#fef3c7;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  background: var(--bg); color: var(--text-1); font-size: 14px;
+}
+.page { max-width: 1180px; margin: 0 auto; padding: 18px 16px 40px; }
+.head h1 { font-size: 21px; }
+.head h1 .dot { color: var(--accent); }
+.sub { color: var(--text-3); font-size: 12px; margin-top: 4px; }
+
+/* filter bar */
+.filter-bar { background: #fff; border: 1.5px solid var(--border); border-radius: 16px; padding: 16px; margin: 16px 0 20px; box-shadow: 0 2px 12px rgba(0,0,0,.05); }
+.search-bar { position: relative; margin-bottom: 12px; }
+.search-bar input { width: 100%; border: 1.5px solid var(--border); border-radius: 10px; padding: 11px 38px 11px 38px; font-size: 14px; color: var(--text-1); background: var(--bg); outline: none; transition: border-color .2s, box-shadow .2s; font-family: inherit; }
+.search-bar input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(53,104,84,.1); background: #fff; }
+.search-bar input::placeholder { color: var(--text-3); }
+.search-ico { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--text-3); display: flex; }
+.search-clear { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: var(--border); border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; font-size: 15px; color: var(--text-2); display: none; align-items: center; justify-content: center; line-height: 1; padding: 0; }
+.search-clear.show { display: flex; }
+.filter-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.tf-btn { display: inline-flex; align-items: center; gap: 5px; padding: 7px 14px; border-radius: 100px; border: 1.5px solid var(--border); background: #fff; font-size: 12px; font-weight: 600; cursor: pointer; transition: all .15s; color: var(--text-2); white-space: nowrap; font-family: inherit; }
+.tf-btn:hover { border-color: var(--primary); color: var(--primary); }
+.tf-btn.on-all { border-color: var(--primary); background: var(--primary); color: #fff; }
+.tf-btn.on-viet { border-color: var(--viet); background: var(--viet); color: #fff; }
+.tf-btn.on-nv { border-color: var(--nv); background: var(--nv); color: #fff; }
+.tf-btn .n { opacity: .8; font-size: 11px; }
+.filter-select { padding: 8px 28px 8px 12px; border: 1.5px solid var(--border); border-radius: 10px; font-size: 13px; font-weight: 500; color: var(--text-1); background: #fff; outline: none; cursor: pointer; transition: border .2s; font-family: inherit; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%239aada6' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; }
+.filter-select:focus { border-color: var(--primary); }
+.refresh-btn { padding: 8px 14px; border: 1.5px solid var(--border); border-radius: 10px; background: #fff; color: var(--text-2); cursor: pointer; font-size: 13px; font-family: inherit; transition: all .15s; white-space: nowrap; }
+.refresh-btn:hover { border-color: var(--primary); color: var(--primary); }
+.count { font-size: 12px; color: var(--text-3); margin-left: auto; }
+
+/* table */
+.wrap { background: #fff; border-radius: 10px; overflow: auto; border: 1px solid #e3e3e3; }
+table { width: 100%; border-collapse: collapse; min-width: 860px; }
+th { background: #1a1a1a; color: #fff; font-size: 11px; font-weight: 600; text-align: left; padding: 10px; cursor: pointer; white-space: nowrap; }
+th:hover { background: #333; }
+th .arr { opacity: .55; font-size: 9px; }
+td { padding: 9px 10px; border-top: 1px solid #eee; vertical-align: top; font-size: 13px; }
+tr.nv td { background: var(--nv-soft); }
+tr:not(.nv):nth-child(even) td { background: #fafafa; }
+tr:hover td { background: var(--accent-soft); }
+tr.closed td { opacity: .5; }
+.tag { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; white-space: nowrap; }
+.tag.viet { background: var(--viet-soft); color: var(--viet); }
+.tag.nv { background: var(--nv-soft); color: var(--nv); }
+.tag.closed { background: #eee; color: #888; margin-top: 4px; }
+.desc { color: #555; font-size: 12px; line-height: 1.45; min-width: 240px; }
+.center { text-align: center; }
+.msg { padding: 50px 20px; text-align: center; color: #888; line-height: 1.6; }
+.msg.err { color: var(--accent); }
+.spin { width: 26px; height: 26px; border: 3px solid #eee; border-top-color: var(--accent); border-radius: 50%; margin: 0 auto 12px; animation: r .8s linear infinite; }
+@keyframes r { to { transform: rotate(360deg); } }
+.foot { margin-top: 12px; font-size: 11px; color: #999; text-align: center; }
+
+@media (max-width: 600px) {
+  .head h1 { font-size: 18px; }
+  .filter-row { gap: 6px; }
+  .tf-btn { padding: 6px 11px; font-size: 11px; }
+  .count { width: 100%; margin-left: 0; }
+}
 </style>
 </head>
 <body>
@@ -83,18 +83,24 @@
     <div class="sub" id="sub">Đang tải dữ liệu…</div>
   </div>
 
-  <div class="bar">
-    <div class="chip on" data-f="all">Tất cả <span class="n" id="n-all"></span></div>
-    <div class="chip" data-f="Việt">Việt <span class="n" id="n-viet"></span></div>
-    <div class="chip" data-f="Nhật-Việt">Nhật-Việt <span class="n" id="n-nv"></span></div>
-    <select class="sel" id="status">
-      <option value="active">Đang tuyển</option>
-      <option value="inactive">Đã đóng</option>
-      <option value="all">Tất cả trạng thái</option>
-    </select>
-    <input class="search" id="search" placeholder="Tìm công việc, ngành, tỉnh…">
-    <button class="btn" id="refresh">↻ Làm mới</button>
-    <div class="count" id="count"></div>
+  <div class="filter-bar">
+    <div class="search-bar">
+      <span class="search-ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/></svg></span>
+      <input id="search" type="text" placeholder="Tìm công việc, ngành, tỉnh…" autocomplete="off">
+      <button class="search-clear" id="searchClear">×</button>
+    </div>
+    <div class="filter-row">
+      <button class="tf-btn on-all" data-f="all">Tất cả <span class="n" id="n-all"></span></button>
+      <button class="tf-btn" data-f="Việt">Việt <span class="n" id="n-viet"></span></button>
+      <button class="tf-btn" data-f="Nhật-Việt">Nhật-Việt <span class="n" id="n-nv"></span></button>
+      <select class="filter-select" id="status">
+        <option value="active">Đang tuyển</option>
+        <option value="inactive">Đã đóng</option>
+        <option value="all">Tất cả trạng thái</option>
+      </select>
+      <button class="refresh-btn" id="refresh">↻ Làm mới</button>
+      <div class="count" id="count"></div>
+    </div>
   </div>
 
   <div class="wrap">
@@ -107,13 +113,7 @@
 </div>
 
 <script>
-/* ================================================================
-   CẤU HÌNH
-   Trang đọc dữ liệu từ Google Sheet CÔNG KHAI "Trung Phạm Tokutei"
-   — sheet này chỉ chứa cột A→P, KHÔNG có Nguồn, Hoa hồng, Net.
-   ================================================================ */
 const SHEET_ID = "1ASjVcbiuclPYd-FkVKa7uIKjjKqzwRUCFpSmrdYVQ1E";
-/* ================================================================ */
 const CSV_URL = "https://docs.google.com/spreadsheets/d/" + SHEET_ID + "/gviz/tq?tqx=out:csv";
 
 const COLS = [
@@ -238,7 +238,21 @@ function render(){
   document.getElementById("n-viet").textContent=base.length-nv;
   document.getElementById("n-nv").textContent=nv;
   document.getElementById("count").textContent=`Hiển thị ${rows.length} job`;
-  document.querySelectorAll(".chip").forEach(c=>c.classList.toggle("on",c.dataset.f===filter));
+
+  document.querySelectorAll(".tf-btn").forEach(b=>{
+    b.className="tf-btn";
+    if(b.dataset.f===filter){
+      if(filter==="all") b.classList.add("on-all");
+      else if(filter==="Việt") b.classList.add("on-viet");
+      else b.classList.add("on-nv");
+    }
+  });
+}
+
+function clearSearch(){
+  document.getElementById("search").value="";
+  document.getElementById("searchClear").classList.remove("show");
+  render();
 }
 
 async function load(){
@@ -253,7 +267,7 @@ async function load(){
     ALL=buildJobs(text);
     const act=ALL.filter(x=>x.trang==="active").length;
     document.getElementById("sub").textContent=
-      `${ALL.length} job đầu Việt (Việt + Nhật-Việt) · ${act} đang tuyển, ${ALL.length-act} đã đóng`;
+      `${ALL.length} job (Việt + Nhật-Việt) · ${act} đang tuyển, ${ALL.length-act} đã đóng`;
     document.getElementById("foot").textContent=
       "Dữ liệu từ Google Sheets · Cập nhật lúc "+new Date().toLocaleString("vi-VN");
     render();
@@ -264,11 +278,15 @@ async function load(){
   }
 }
 
-document.querySelectorAll(".chip").forEach(c=>{
-  c.onclick=()=>{ filter=c.dataset.f; render(); };
+document.querySelectorAll(".tf-btn").forEach(b=>{
+  b.onclick=()=>{ filter=b.dataset.f; render(); };
 });
 document.getElementById("status").onchange=function(){ status=this.value; render(); };
-document.getElementById("search").oninput=render;
+document.getElementById("search").oninput=function(){
+  document.getElementById("searchClear").classList.toggle("show", this.value.length>0);
+  render();
+};
+document.getElementById("searchClear").onclick=clearSearch;
 document.getElementById("refresh").onclick=load;
 load();
 </script>
